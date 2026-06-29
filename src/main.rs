@@ -1,12 +1,13 @@
 mod api;
+mod domain;
 
-use axum::{Router, routing::post};
+use axum::{Router, routing::{get, post}};
 
 fn routes() -> Router {
     Router::new()
         .route("/LagreFilB2B", post(api::lagre_fil_b2b_handler))
         .route("/HentUNCForFiler", post(api::hent_unc_for_filer_handler))
-        .route("/Ping", post(api::ping_handler))
+        .route("/Ping", get(api::ping_handler))
 }
 
 #[tokio::main]

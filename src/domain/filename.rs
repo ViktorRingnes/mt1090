@@ -12,10 +12,15 @@ pub fn valider_filnavn(navn: &str) -> Result<String, FilmottakError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use proptest::prelude::*;
 
-    #[test]
-    fn rejects_filnavn_with_separator() {
-        assert!(valider_filnavn("rapport.txt").is_ok());
-        assert!(valider_filnavn("rap##ort.txt").is_err());
+    proptest! {
+        #[test]
+        fn ok_iff_no_separator(navn in ".*") {
+            match valider_filnavn(&navn) {
+                Ok(out) => prop_assert!(!navn.contains(SEPARATOR) && out == navn),
+                Err(_) => prop_assert!(navn.contains(SEPARATOR)),
+            }
+        }
     }
 }

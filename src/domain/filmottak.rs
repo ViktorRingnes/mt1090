@@ -56,3 +56,56 @@ fn resolve_unc(avsenderkode: &str, filreferanse: &str) -> Result<String, Filmott
     }
     Ok(String::new())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::api::FilinformasjonType;
+
+    struct Cleanup(PathBuf);
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            let _ = fs::remove_file(&self.0);
+        }
+    }
+
+    fn info(filreferanse: &str) -> FilinformasjonType {
+        FilinformasjonType {
+            filreferanse: filreferanse.to_string(),
+            avsenderkode: "Eksamensdata".to_string(),
+        }
+    }
+
+    #[test]
+    fn store_then_resolve_round_trips() {
+        let reference = store_file(b"hei".to_vec(), "round_trip.txt", "Eksamensdata").unwrap();
+        let unc = resolve_uncs(vec![info(&reference)]).unwrap();
+        let _cleanup = Cleanup(PathBuf::from(&unc[0]));
+
+        assert_eq!(unc.len(), 1);
+        assert!(unc[0].ends_with(&reference));
+        assert!(Path::new(&unc[0]).exists());
+    }
+
+    #[test]
+    fn store_rejects_unknown_code() {
+        assert!(matches!(
+            store_file(b"x".to_vec(), "a.txt", "Nope"),
+            Err(FilmottakError::UnknownAvsenderkode(_))
+        ));
+    }
+
+    #[test]
+    fn store_rejects_filename_with_separator() {
+        assert!(matches!(
+            store_file(b"x".to_vec(), "a##b.txt", "Eksamensdata"),
+            Err(FilmottakError::InvalidFilename)
+        ));
+    }
+
+    #[test]
+    fn resolve_unknown_reference_is_empty() {
+        let unc = resolve_uncs(vec![info("ref-som-ikke-finnes")]).unwrap();
+        assert_eq!(unc, vec![String::new()]);
+    }
+}

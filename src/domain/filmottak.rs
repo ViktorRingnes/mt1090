@@ -1,6 +1,13 @@
-use std::{fs, path::Path};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
-use crate::{config, domain::{self, FilmottakError}};
+use crate::{
+    api::FilinformasjonType,
+    config,
+    domain::{self, FilmottakError},
+};
 
 pub fn store_file(
     file_bytes: Vec<u8>,
@@ -23,4 +30,29 @@ fn write_to_disk(folder: &Path, file_path: &Path, bytes: &[u8]) -> Result<(), Fi
     fs::create_dir_all(folder)?;
     fs::write(file_path, bytes)?;
     Ok(())
+}
+
+fn folder_for(avsenderkode: &str) -> Result<PathBuf, FilmottakError> {
+    let subfolder = domain::avsender::valider_avsender_kode(avsenderkode)?;
+    Ok(Path::new(&config::get().rotmappe).join(subfolder))
+}
+
+
+pub fn resolve_uncs(items: Vec<FilinformasjonType>) -> Result<Vec<String>, FilmottakError> {
+    items.iter()
+        .map(|f| resolve_unc(&f.avsenderkode, &f.filreferanse))
+        .collect()
+}
+
+fn resolve_unc(avsenderkode: &str, filreferanse: &str) -> Result<String, FilmottakError> {
+    let folder = folder_for(avsenderkode)?;
+    let Ok(entries) = fs::read_dir(&folder) else { return Ok(String::new()) };
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.to_string_lossy().ends_with(filreferanse) {
+            return Ok(path.to_string_lossy().into_owned());
+        }
+    }
+    Ok(String::new())
 }

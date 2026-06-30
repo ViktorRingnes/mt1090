@@ -1,13 +1,17 @@
 use axum::{Json, http::StatusCode, response::IntoResponse};
 
-use crate::{api::{HentUNCForFilerParameter, LagreFilB2BParameter, LagreFilB2BRetur, PingRetur}, domain};
+use crate::{
+    api::{HentUNCForFilerParameter, LagreFilB2BParameter, LagreFilB2BRetur, PingRetur},
+    domain::{self, FilmottakError},
+};
 
-pub async fn lagre_fil_b2b_handler(Json(data): Json<LagreFilB2BParameter>) -> impl IntoResponse {
-    let filreferanse = domain::filmottak::store_file(data.fil).unwrap();
+pub async fn lagre_fil_b2b_handler(
+    Json(data): Json<LagreFilB2BParameter>,
+) -> Result<Json<LagreFilB2BRetur>, FilmottakError> {
+    let _avsender_kode = domain::avsender::valider_avsender_kode(&data.avsenderkode);
+    let filreferanse = domain::filmottak::store_file(data.fil)?;
 
-    Json(LagreFilB2BRetur {
-        filreferanse
-    })
+    Ok(Json(LagreFilB2BRetur { filreferanse }))
 }
 
 pub async fn hent_unc_for_filer_handler(_: Json<HentUNCForFilerParameter>) -> impl IntoResponse {

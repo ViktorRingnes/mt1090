@@ -8,8 +8,8 @@ use crate::{
 pub async fn lagre_fil_b2b_handler(
     Json(data): Json<LagreFilB2BParameter>,
 ) -> Result<Json<LagreFilB2BRetur>, FilmottakError> {
-    let _avsender_kode = domain::avsender::valider_avsender_kode(&data.avsenderkode);
-    let filreferanse = domain::filmottak::store_file(data.fil)?;
+    let filreferanse =
+        domain::filmottak::store_file(data.fil, &data.filnavn, &data.avsenderkode)?;
 
     Ok(Json(LagreFilB2BRetur { filreferanse }))
 }

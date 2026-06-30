@@ -1,4 +1,5 @@
 mod api;
+mod config;
 mod domain;
 
 use axum::{Router, routing::{get, post}};
@@ -12,6 +13,8 @@ fn routes() -> Router {
 
 #[tokio::main]
 async fn main() {
+    println!("tenant id: {}", config::get().aad.tenant_id);
+
     let app = Router::new().nest("/MT1090_v1", routes());
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:5000")

@@ -1,9 +1,12 @@
-use crate::domain::FilmottakError::{self, InvalidFilename};
+use crate::domain::{self, FilmottakError};
 
-pub fn store_file(file_bytes: Vec<u8>) -> Result<String, FilmottakError> {
-    if file_bytes.iter().len() > 5 {
-        return Err(InvalidFilename)
-    }
+pub fn store_file(
+    _file_bytes: Vec<u8>,
+    filnavn: &str,
+    avsenderkode: &str,
+) -> Result<String, FilmottakError> {
+    domain::filename::valider_filnavn(filnavn)?;
+    domain::avsender::valider_avsender_kode(avsenderkode)?;
 
-    Ok("hello world".to_string())
+    Ok(domain::reference::generate_reference())
 }

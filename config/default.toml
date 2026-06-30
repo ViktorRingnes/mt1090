@@ -1,0 +1,17 @@
+app_id = "mt1090"
+rotmappe = "data"
+separator = "##"
+
+[aad]
+instance = "https://login.microsoftonline.com/"
+tenant_id = "d248b7d3-b074-4178-91b4-719af584183a"
+client_id = "28433e22-0f86-4b82-baf0-457e2f176091"
+client_secret = "REPLACE_ME"
+
+[avsenderkoder]
+Eksamensdata = "Eksamensdata"
+Studentstatus = "Studentstatus"
+KlargjorkundesakVedlegg = "KlargjorkundesakVedlegg"
+EHenvendelseVedlegg = "EHenvendelseVedlegg"
+StotterettVedlegg = "StotterettVedlegg"
+AflKodeVedlegg = "AflKodeVedlegg"
